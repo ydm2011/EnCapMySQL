@@ -1,0 +1,2 @@
+this is the connect pool of the mysql;
+it include three files: connector.h connectpool.h and connecterface.h

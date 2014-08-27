@@ -29,7 +29,7 @@ Connector::Connector(const Testhandle& _info)
     info.sock_name = _info.sock_name;
     info.flags = _info.flags;
     //use the log
-    log.init(("./mysql.log"));
+    log.init(("./mysql_connector.log"));
     pthread_mutex_init(&lock,NULL);
     connectOrNot = false;
     mysql_init(&db);
@@ -38,7 +38,7 @@ Connector::Connector(const Testhandle& _info)
 //
 Connector::Connector()
 {
-    log.init(("./mysql.log"));
+    log.init(("./mysql_connector.log"));
     pthread_mutex_init(&lock,NULL);
     connectOrNot = false;
     mysql_init(&db);
@@ -160,13 +160,18 @@ void Connector::parseRows(vector<string>& result)
     mysql_free_result(res);
     res = (MYSQL_RES*)0;
 }
-
+//close the connnect
 void Connector::closeConnect()
 {
     mysql_close(&db);
     connectOrNot = false;
 }
-
+//return the affected no of the mysql;
+unsigned long long Connector::mysql_affected()
+{
+    return mysql_affected_rows(&db);
+}
+//check the connect status;
 bool Connector::is_connect()
 {
     return connectOrNot;

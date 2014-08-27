@@ -26,6 +26,7 @@ ConnectPool::ConnectPool(const Testhandle& info, int maxSize):currSize(0)
 {
     this->info = info;
     this->maxSize = maxSize;
+    log.init(("./mysql_connectpool.log"));
     pthread_mutex_init(&lock,NULL);
 }
 //close all the connection and delete the connectPool

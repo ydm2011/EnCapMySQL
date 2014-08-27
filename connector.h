@@ -43,7 +43,7 @@ struct Testhandle{
         db_name = "daoming_test";
         sock_name = (const char*)0;
         port_number = 0;
-        flags = 0;
+        flags = CLIENT_FOUND_ROWS;//can return all the affected rows no by setting this;
     }
 
     std::string host;
@@ -65,7 +65,7 @@ class Connector
         int fetch_one(Resultmode mode = USE_RESULT_MODE);//get one result from the res_result
         int fetch_all(Resultmode mode = STORE_RESULT_MODE);//get all the result;
 
-        int mysql_affected();
+        unsigned long long mysql_affected();//return the affected status of the mysql;
         bool is_connect();//whether the db is connect;
         void closeConnect();//close the  connect
         void parseRows(std::vector<std::string>& result);//parse the sql result to string

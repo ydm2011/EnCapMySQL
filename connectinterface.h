@@ -20,23 +20,31 @@
 #include "connector.h"
 #include "connectpool.h"
 namespace mysql_interface{
-
+enum GetNo{ONE,ALL};
 class SqlInterface{
 public:
     SqlInterface(Connector* connectHandle);
-    //bool query(const char* sql_query);
-    void fetch_one(const std::string& query,std::string& result,Resultmode mode=USE_RESULT_MODE);
-    void fetch_all(const std::string& query,std::vector<std::string>& result,Resultmode mode=STORE_RESULT_MODE);
-    //void read_field(std::string& result);
-    //void read_field(std::vector<std::string>& result);
+    void query(const std::string& sql_query,GetNo getno=ONE,Resultmode mode = USE_RESULT_MODE)throw(SqlException);
+    std::string get_one();
+    const std::vector<std::string>& get_all();
+    unsigned long get_status();
     ~SqlInterface();
+protected:
+    void fetch_one(const std::string& query,Resultmode mode=USE_RESULT_MODE)throw(SqlException);
+    void fetch_all(const std::string& query,Resultmode mode=USE_RESULT_MODE)throw(SqlException);
 private:
 
+
+    GetNo no;
     Connector* connectorPtr;
-    pthread_mutex_t lock;
-    //MYSQL_RES* res;
-    //MYSQL_ROW sqlRow;
-    //std::vector<MYSQL_ROW> rowVector;
+
+    unsigned long long query_status;
+
+    //store the query result;
+    std::string result;
+    std::vector<std::string> results;
+
+    confmgr::Log log;
 };
 
 }

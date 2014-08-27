@@ -34,11 +34,10 @@ protected:
     void fetch_all(const std::string& query,Resultmode mode=USE_RESULT_MODE)throw(SqlException);
 private:
 
-
     GetNo no;
     Connector* connectorPtr;
 
-    unsigned long long query_status;
+    unsigned long  query_status;
 
     //store the query result;
     std::string result;

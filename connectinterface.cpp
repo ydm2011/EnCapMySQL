@@ -38,7 +38,7 @@ void SqlInterface::query(const string &sql_query, GetNo getno,Resultmode mode)th
         log.write_log(confmgr::LEVEL_WARNING,"__SqlInterface__:query:__line__:37");
     }
     if(result.size()&&results.size())
-        log.write_log(confmgr::LEVEL_WARNING,"__SqlInterface__:query:__line__:38");
+        log.write_log(confmgr::LEVEL_WARNING,"__SqlInterface__:query:__line__:41");
     no = getno;
     try{
         if(no==ONE)
@@ -90,7 +90,7 @@ void SqlInterface:: fetch_one(const std::string& query,Resultmode mode)throw(Sql
     if(!connectorPtr->is_connect())
     {
         log.write_log(confmgr::LEVEL_ERROR,"__SqlInterface__:fetch_one:__line__:36");
-        Throw(SqlException,"SqlInterface:: fetch_one");
+        Throw(SqlException,"SqlInterface:: fetch_one:__LINE__:93");
         //std::cout<<"Not connect,please get another one!"<<std::endl;
         return ;
     }

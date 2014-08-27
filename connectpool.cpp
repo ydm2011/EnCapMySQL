@@ -18,8 +18,7 @@
 
 #include "connectpool.h"
 using namespace mysql_interface;
-//initial the staic var defination
-ConnectPool* ConnectPool::connectPool= (ConnectPool*)0;
+ConnectPool* ConnectPool::connectPoolInstance= (ConnectPool*)0;
 //testhandle needed by the mysql connection function;maxSize is the max
 //connection no of the pool
 ConnectPool::ConnectPool(const Testhandle& info, int maxSize):currSize(0)
@@ -32,9 +31,8 @@ ConnectPool::ConnectPool(const Testhandle& info, int maxSize):currSize(0)
 //close all the connection and delete the connectPool
 ConnectPool::~ConnectPool()
 {
-    connectPool->destoryConnectPool();
-    delete connectPool;
-    connectPool = (ConnectPool*)0;
+    connectPoolInstance ->destoryConnectPool();
+    connectPoolInstance = (ConnectPool*)0;
     pthread_mutex_destroy(&lock);
 }
 //put the connection back  to the  Connectpool;
@@ -57,9 +55,9 @@ ConnectPool* ConnectPool::getInstance(const Testhandle& info, int maxSize)
         throw 0;
     if(maxSize>50)
         maxSize = 50;
-    if(connectPool==0)
-        connectPool = new ConnectPool(info,maxSize);
-    return connectPool;
+    if(connectPoolInstance==0)
+        connectPoolInstance = new ConnectPool(info,maxSize);
+    return connectPoolInstance;
 }
 //if there are no connection in the pool ,this will be called to create a new connection
 Connector* ConnectPool::createConnector()

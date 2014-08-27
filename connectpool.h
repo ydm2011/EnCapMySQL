@@ -41,14 +41,23 @@ namespace mysql_interface{
             //private construction
             ConnectPool(const Testhandle& info,int maxSize);
 
-
+            //this class clean the ConnectPool
+            class CleanPool{
+            public:
+                ~CleanPool()
+                {
+                    if(ConnectPool::connectPoolInstance)
+                        delete ConnectPool::connectPoolInstance;
+                }
+            };
+            static CleanPool cleanpool;
             confmgr::Log log;
             int currSize;
             int maxSize;
             Testhandle info;
             std::list<Connector*> connectorList;
             pthread_mutex_t lock;
-            static ConnectPool *connectPool;
+            static ConnectPool *connectPoolInstance;
     };
 }
 #endif

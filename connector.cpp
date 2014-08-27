@@ -47,7 +47,8 @@ Connector::Connector()
 //
 Connector::~Connector()
 {
-    closeConnect();
+    if(is_connect())
+        closeConnect();
     pthread_mutex_destroy(&lock);
     if(res)
         mysql_free_result(res);

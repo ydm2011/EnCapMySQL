@@ -5,6 +5,9 @@ using namespace std;
 using namespace mysql_interface;
 int main()
 {
+    /*
+     * test connector!
+     */
     //Testhandle addr;
     //ConnectPool* connectpool = ConnectPool::getInstance(addr,5);
     Connector connector;
@@ -21,8 +24,16 @@ int main()
     connector.parseRows(test);
     std::cout<<test[1]<<std::endl;
     std::cout<<test[2]<<std::endl;
-    cout << "Hello World!" << endl;
+    std::cout<<connector.mysql_affected()<<std::endl;
+    connector.closeConnect();
+    //connector.~Connector();
+    /*
+     * test ConnectPool!
+     */
+    Testhandle test_info;//use default;
+    ConnectPool* pool;
+    pool = ConnectPool::getInstance(test_info,10);
+    std::cout<<"finsh"<<std::endl;
     return 0;
-
 }
 

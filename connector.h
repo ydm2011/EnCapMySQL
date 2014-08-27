@@ -65,6 +65,7 @@ class Connector
         int fetch_one(Resultmode mode = USE_RESULT_MODE);//get one result from the res_result
         int fetch_all(Resultmode mode = STORE_RESULT_MODE);//get all the result;
 
+        int mysql_affected();
         bool is_connect();//whether the db is connect;
         void closeConnect();//close the  connect
         void parseRows(std::vector<std::string>& result);//parse the sql result to string
@@ -95,6 +96,7 @@ class Connector
 
     private:
         //std::ofstream* log;
+        int affectedNo;
         confmgr::Log log;
         MYSQL db;//the handle of mysql connection
         pthread_mutex_t lock;//lock not use in here

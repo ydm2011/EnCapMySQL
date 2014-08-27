@@ -33,8 +33,7 @@ public:
 private:
 
     Connector* connectorPtr;
-
-    //pthread_mutex_t lock;
+    pthread_mutex_t lock;
     //MYSQL_RES* res;
     //MYSQL_ROW sqlRow;
     //std::vector<MYSQL_ROW> rowVector;

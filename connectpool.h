@@ -21,17 +21,7 @@
 #include "connector.h"
 #include <list>
 namespace mysql_interface{
-     /*
-      * this function just use for test!
-      */
-    class MysqlPoolException : public confmgr::ExceptionBase
-    {
-        public:
-            DEFINE_EXCEPTION(MysqlPoolException,ExceptionBase)
-    };
-    /*
-     * the connector pool ,all the connector come from this pool;
-     */
+
     class ConnectPool{
         public:
             ~ConnectPool();

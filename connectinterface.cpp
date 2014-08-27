@@ -29,7 +29,7 @@ SqlInterface::~SqlInterface()
 {
     connectorPtr = (Connector*)0;
 }
-//get one string of the
+//get one string of the result;
 void SqlInterface:: fetch_one(const std::string& query,std::string& result,Resultmode mode)
 {
     if(!connectorPtr->is_connect())

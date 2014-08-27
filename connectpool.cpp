@@ -34,7 +34,7 @@ ConnectPool::~ConnectPool()
     connectPool->destoryConnectPool();
     delete connectPool;
     connectPool = (ConnectPool*)0;
-    pthread_mutex_destory(&lock); 
+    pthread_mutex_destroy(&lock);
 }
 //put the connection back  to the  Connectpool;
 void ConnectPool::freeConnection(Connector* connector)
@@ -45,7 +45,8 @@ void ConnectPool::freeConnection(Connector* connector)
         connectorList.push_back(connector);
         pthread_mutex_unlock(&lock);
     }else{
-
+        log.write_log(confmgr::LEVEL_WARNING,"__ConnectPool__:__freeConnection__:__line__:42");
+        //Throw(SqlException,"__ConnectPool__:__free__Connection__:__line__48");
     }
 }
 //get the instansce for singleton
@@ -63,11 +64,13 @@ ConnectPool* ConnectPool::getInstance(const Testhandle& info, int maxSize)
 Connector* ConnectPool::createConnector()
 {
     Connector* connector_ptr = new Connector(info);
-    //try{
-    if(!connector_ptr->connect()){
-        std::cout<<"Connect failed!"<<std::endl;
-        return (Connector*)0;
-    }    
+    try{
+        connector_ptr->connect();
+    }catch(...)
+    {
+        log.write_log(confmgr::LEVEL_ERROR,"__ConnectPool__:__createConnector__:__line__:68");
+        return (Connector*)0;;
+    }
     return connector_ptr;
 }
 
@@ -78,15 +81,14 @@ void ConnectPool::initConnectPool(int connectSize)
     currSize = 0;
     if(connectSize > maxSize)
     {
-        std::cout<<"_FUNC__ ConnectPool::initConnectionPool="
-            <<"connectSize larger than the maxSize,set the default!"<<std::endl;
+        log.write_log(confmgr::LEVEL_WARNING,"__ConnectPool__:__initConnectPool__:__line__:42");
         connectSize = maxSize;
     }
     pthread_mutex_lock(&lock);
     for(int i=0;i<connectSize;i++)
     {
         connector_ptr = createConnector();
-        if(!connector_ptr)
+        if(connector_ptr)
         {
             connectorList.push_back(connector_ptr);
             currSize++;
@@ -98,12 +100,12 @@ void ConnectPool::initConnectPool(int connectSize)
 void ConnectPool::destoryConnectPool()
 {
     std::list<Connector*>::iterator iter;
-    pthread_mutex_lock(&lock);
-    Connector conn_tr;
+    //Connector conn_tr;
+    pthread_mutex_lock(&lock);  
     for(iter=connectorList.begin();iter!=connectorList.end();iter++)
     {
         if(!destoryConnection((*iter)))
-            std::cout<<"destory connect pool failed!";
+            log.write_log(confmgr::LEVEL_WARNING,"__ConnectPool__:destoryConnectPool:__line__:107");
     }
     connectorList.clear();   
     currSize=0;
@@ -140,13 +142,16 @@ Connector* ConnectPool::getConnector()
         if(connPtr)
         {
             currSize++;
-            pthread_mutex_unlock(&lock);
         }else
+        {
+            log.write_log(confmgr::LEVEL_WARNING,"__ConnectPool__:getConnector:__line__:141");
             connPtr = (Connector*)0;
+        }
     }else
     {
-        pthread_mutex_unlock(&lock);
+        log.write_log(confmgr::LEVEL_WARNING,"__ConnectPool__:getConnector:__line__:139");
         connPtr =  (Connector*)0;
     }
+    pthread_mutex_unlock(&lock);
     return connPtr;
 }

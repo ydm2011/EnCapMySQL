@@ -60,7 +60,7 @@ class Connector
     public:
         Connector();//the local database;
         Connector(const Testhandle& _info);//pass the connection info
-        bool connect();//connect the database
+        bool connect()throw(SqlException);//connect the database
         int query(const char* sql_query);//query the database
         int fetch_one(Resultmode mode = USE_RESULT_MODE);//get one result from the res_result
         int fetch_all(Resultmode mode = STORE_RESULT_MODE);//get all the result;

@@ -24,16 +24,17 @@ namespace mysql_interface{
 
     class ConnectPool{
         public:
-            ~ConnectPool();
+
             Connector* getConnector();
+            bool checkPool();
             void freeConnection(Connector* connector);
             static ConnectPool* getInstance(const Testhandle& info, int maxSize);
-
+            ~ConnectPool();
         private:
             //create a connector 
             Connector* createConnector();
             //initial the connectpool 
-            void initConnectPool(int connectSize);
+            void initConnectPool(int connectorSize);
             //destory connect pool
             void destoryConnectPool();
             //free the connnection 
@@ -50,9 +51,9 @@ namespace mysql_interface{
                         delete ConnectPool::connectPoolInstance;
                 }
             };
-            static CleanPool cleanpool;
             confmgr::Log log;
-            int currSize;
+
+            int realSize;
             int maxSize;
             Testhandle info;
             std::list<Connector*> connectorList;

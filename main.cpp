@@ -24,15 +24,30 @@ int main()
     connector.parseRows(test);
     std::cout<<test[1]<<std::endl;
     std::cout<<test[2]<<std::endl;
+    //test the affected rows
     std::cout<<connector.mysql_affected()<<std::endl;
     connector.closeConnect();
+    if(!connector.is_connect())
+        std::cout<<"Connector is closed!"<<std::endl;
     //connector.~Connector();
+
     /*
      * test ConnectPool!
      */
     Testhandle test_info;//use default;
     ConnectPool* pool;
-    pool = ConnectPool::getInstance(test_info,10);
+    pool = ConnectPool::getInstance(test_info,10);//test the constructor
+
+    Connector* test_pool_connector;
+    test_pool_connector=pool->getConnector();//get the connector from the pool
+    if(test_pool_connector->is_connect())
+        std::cout<<"connector have connected!"<<endl;
+    pool->freeConnection(test_pool_connector);
+
+    /*
+     *
+     */
+
     std::cout<<"finsh"<<std::endl;
     return 0;
 }

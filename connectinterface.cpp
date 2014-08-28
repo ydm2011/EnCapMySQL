@@ -19,15 +19,20 @@
 using namespace mysql_interface;
 using namespace std;
 //get the connector from the connectPool
-SqlInterface::SqlInterface(Connector* connectHandle):no(ONE),connectorPtr(connectHandle),\
+SqlInterface::SqlInterface(ConnectPool *connectpool):no(ONE),connectPool(connectpool),\
     query_status(0)
 
 {
+    if(!connectpool->checkPool())
+        Throw(SqlException,"The connection of the pool have exhausted!");
+    connectorPtr = connectPool->getConnector();
     log.init(("./mysql_interface.log"));
 }
 //release the connector, do nothing!
 SqlInterface::~SqlInterface()
 {
+    if(connectorPtr)
+        connectPool->freeConnection(connectorPtr);
     connectorPtr = (Connector*)0;
 }
 void SqlInterface::query(const string &sql_query, GetNo getno,Resultmode mode)throw(SqlException)
@@ -39,6 +44,8 @@ void SqlInterface::query(const string &sql_query, GetNo getno,Resultmode mode)th
     }
     if(result.size()&&results.size())
         log.write_log(confmgr::LEVEL_WARNING,"__SqlInterface__:query:__line__:41");
+    result = "";
+    results.clear();
     no = getno;
     try{
         if(no==ONE)
@@ -49,7 +56,9 @@ void SqlInterface::query(const string &sql_query, GetNo getno,Resultmode mode)th
         Throw(SqlException,"");
     }
 }
-
+//the fetch_one interface,return a copy of the response;
+//if the sql mode is limits 1 .it return the result copy;
+//if the sql mode is many,it should return  the last element of the results;
 string SqlInterface::get_one()
 {
     string tmp;
@@ -69,12 +78,14 @@ string SqlInterface::get_one()
     }
     return tmp;
 }
+//the interface of send data to the users
 const vector<string>& SqlInterface::get_all()
 {
     if(no==ONE)
     {
         results.clear();
-        results.push_back(result);
+        if(!result.empty())
+            results.push_back(result);
         result="";
     }
     return results;
@@ -108,7 +119,7 @@ void SqlInterface:: fetch_one(const std::string& query,Resultmode mode)throw(Sql
     result = tmp[0];
 }
 
-
+//get all the response data from the database
 void SqlInterface::fetch_all(const string& query, Resultmode mode)throw(SqlException)
 {
     results.clear();

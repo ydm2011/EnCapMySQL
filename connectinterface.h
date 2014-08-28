@@ -23,7 +23,7 @@ namespace mysql_interface{
 enum GetNo{ONE,ALL};
 class SqlInterface{
 public:
-    SqlInterface(Connector* connectHandle);
+    SqlInterface(ConnectPool* connectpool);
     void query(const std::string& sql_query,GetNo getno=ONE,Resultmode mode = USE_RESULT_MODE)throw(SqlException);
     std::string get_one();
     const std::vector<std::string>& get_all();
@@ -35,9 +35,11 @@ protected:
 private:
 
     GetNo no;
-    Connector* connectorPtr;
+    ConnectPool* connectPool;
+
 
     unsigned long  query_status;
+    Connector* connectorPtr;
 
     //store the query result;
     std::string result;

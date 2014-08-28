@@ -21,13 +21,26 @@ using namespace mysql_interface;
 ConnectPool* ConnectPool::connectPoolInstance= (ConnectPool*)0;
 //testhandle needed by the mysql connection function;maxSize is the max
 //connection no of the pool
-ConnectPool::ConnectPool(const Testhandle& info, int maxSize):currSize(0)
+ConnectPool::ConnectPool(const Testhandle& info, int maxSize):realSize(0)
 {
+    static CleanPool cleanpool;
     this->info = info;
     this->maxSize = maxSize;
     log.init(("./mysql_connectpool.log"));
     pthread_mutex_init(&lock,NULL);
 }
+//check whether the pool have enough connections!
+bool ConnectPool::checkPool()
+{
+    pthread_mutex_lock(&lock);
+    bool status;
+    if(!connectorList.size())
+        status = false;
+    else status = true;
+    pthread_mutex_unlock(&lock);
+    return status;
+}
+
 //close all the connection and delete the connectPool
 ConnectPool::~ConnectPool()
 {
@@ -57,6 +70,7 @@ ConnectPool* ConnectPool::getInstance(const Testhandle& info, int maxSize)
         maxSize = 50;
     if(connectPoolInstance==0)
         connectPoolInstance = new ConnectPool(info,maxSize);
+    connectPoolInstance->initConnectPool(maxSize);
     return connectPoolInstance;
 }
 //if there are no connection in the pool ,this will be called to create a new connection
@@ -74,23 +88,18 @@ Connector* ConnectPool::createConnector()
 }
 
 //initial the pool after get the pool;
-void ConnectPool::initConnectPool(int connectSize)
+void ConnectPool::initConnectPool(int connectorSize)
 {
     Connector* connector_ptr;
-    currSize = 0;
-    if(connectSize > maxSize)
-    {
-        log.write_log(confmgr::LEVEL_WARNING,"__ConnectPool__:__initConnectPool__:__line__:42");
-        connectSize = maxSize;
-    }
+    connectorSize /= 2;
     pthread_mutex_lock(&lock);
-    for(int i=0;i<connectSize;i++)
+    for(int i=0;i<connectorSize;i++)
     {
         connector_ptr = createConnector();
         if(connector_ptr)
         {
             connectorList.push_back(connector_ptr);
-            currSize++;
+            realSize++;
         }
     }
     pthread_mutex_unlock(&lock);
@@ -107,14 +116,14 @@ void ConnectPool::destoryConnectPool()
             log.write_log(confmgr::LEVEL_WARNING,"__ConnectPool__:destoryConnectPool:__line__:107");
     }
     connectorList.clear();   
-    currSize=0;
+    realSize=0;
     pthread_mutex_unlock(&lock);
 }
 
 //destory connection
 bool ConnectPool:: destoryConnection(Connector* connector)
 {
-    connector->closeConnect();
+    //connector->closeConnect();
     delete connector;
     return true;
 }
@@ -124,23 +133,41 @@ Connector* ConnectPool::getConnector()
 {
     Connector* connPtr;
     pthread_mutex_lock(&lock);
+    //connectorList have connections
     if(connectorList.size()>0)
     {
         connPtr = connectorList.front();
         connectorList.pop_front();
+        //try to fix this invalid connector;
         if(connPtr==0)
-            currSize--;
-        else if(!connPtr->is_connect())
+        {
             connPtr = createConnector();
+        }else if(!connPtr->is_connect())
+        {
+            try{
+                connPtr->connect();
+            }catch(SqlException)
+            {
+                delete connPtr;
+                connPtr = createConnector();
+            }
+        }
+        //if the effort that take to fix this  connector, change the realSize!
+        if(!connPtr)
+        {
+            realSize--;
+            log.write_log(confmgr::LEVEL_FATAL,"__ConnectPool__:__getConnector__::__LINE__:156:Get connector failed!");
+        }
         pthread_mutex_unlock(&lock);
         return connPtr;
     }
-    if(currSize < maxSize)
+    //connector is empty!
+    if(realSize < maxSize)
     {
         connPtr = createConnector();
         if(connPtr)
         {
-            currSize++;
+            realSize++;
         }else
         {
             log.write_log(confmgr::LEVEL_WARNING,"__ConnectPool__:getConnector:__line__:141");
@@ -148,7 +175,7 @@ Connector* ConnectPool::getConnector()
         }
     }else
     {
-        log.write_log(confmgr::LEVEL_WARNING,"__ConnectPool__:getConnector:__line__:139");
+        log.write_log(confmgr::LEVEL_WARNING,"__ConnectPool__:getConnector:__line__:139:The Connections of connection have Exhausted!");
         connPtr =  (Connector*)0;
     }
     pthread_mutex_unlock(&lock);

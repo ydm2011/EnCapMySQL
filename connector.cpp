@@ -32,6 +32,7 @@ Connector::Connector(const Testhandle& _info)
     log.init(("./mysql_connector.log"));
     pthread_mutex_init(&lock,NULL);
     connectOrNot = false;
+    res=(MYSQL_RES*)0;
     mysql_init(&db);
 }
 
@@ -54,7 +55,7 @@ Connector::~Connector()
         mysql_free_result(res);
 }
 //connect the sqlserver
-bool Connector:: connect()
+bool Connector:: connect()throw(SqlException)
 {
     MYSQL* conn_ptr;
     conn_ptr = mysql_real_connect(&db,info.host.c_str(),info.user.c_str(),
@@ -63,7 +64,6 @@ bool Connector:: connect()
     {
         log.write_log(confmgr::LEVEL_ERROR,mysql_error(&db));
         Throw(SqlException,"Connector: connect error");
-        return false;
     }
     log.write_log(confmgr::LEVEL_INFO,"Connector: connect success!");
     connectOrNot = true;

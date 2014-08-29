@@ -34,7 +34,7 @@ bool ConnectPool::checkPool()
 {
     pthread_mutex_lock(&lock);
     bool status;
-    if(!connectorList.size())
+    if(!connectorList.size()&&realSize==maxSize)
         status = false;
     else status = true;
     pthread_mutex_unlock(&lock);

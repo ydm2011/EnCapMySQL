@@ -51,7 +51,7 @@ Connector::~Connector()
     if(is_connect())
         closeConnect();
     pthread_mutex_destroy(&lock);
-    if(res)
+    if(res!=(MYSQL_RES*)0)
         mysql_free_result(res);
 }
 //connect the sqlserver
@@ -147,7 +147,7 @@ string Connector::parseRow(MYSQL_ROW sql_row)
     return row;
 
 }
-
+//this will release the cache of the mysql;
 void Connector::parseRows(vector<string>& result)
 {
     if(!rows.size())

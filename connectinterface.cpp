@@ -21,8 +21,9 @@ using namespace std;
 //get the connector from the connectPool
 SqlInterface::SqlInterface(ConnectPool *connectpool):no(ONE),connectPool(connectpool),\
     query_status(0)
-
 {
+    if(!connectpool)
+        Throw(SqlException,"The ConnectPool is not defined");
     if(!connectpool->checkPool())
         Throw(SqlException,"The connection of the pool have exhausted!");
     connectorPtr = connectPool->getConnector();
@@ -47,6 +48,9 @@ void SqlInterface::query(const string &sql_query, GetNo getno,Resultmode mode)th
     result = "";
     results.clear();
     no = getno;
+    //that means don't get the result!
+    if(no==NONE)
+        return;
     try{
         if(no==ONE)
             fetch_one(sql_query,mode);
@@ -67,7 +71,7 @@ string SqlInterface::get_one()
         tmp = result;
         result="";
     }
-    else
+    else if(no != NONE )
     {
         //this return the last element of the fetch_all result;
         if(!results.size())
@@ -75,7 +79,7 @@ string SqlInterface::get_one()
 
         tmp = results.back();
         results.pop_back();
-    }
+    }else tmp="";
     return tmp;
 }
 //the interface of send data to the users
@@ -88,6 +92,8 @@ const vector<string>& SqlInterface::get_all()
             results.push_back(result);
         result="";
     }
+    if(no==NONE)
+        results.clear();
     return results;
 }
 unsigned long SqlInterface::get_status()

@@ -20,7 +20,7 @@
 #include "connector.h"
 #include "connectpool.h"
 namespace mysql_interface{
-enum GetNo{ONE,ALL};
+enum GetNo{NONE,ONE,ALL};
 class SqlInterface{
 public:
     SqlInterface(ConnectPool* connectpool);

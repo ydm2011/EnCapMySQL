@@ -1,6 +1,7 @@
 #include <iostream>
 #include "connector.h"
 #include "connectpool.h"
+#include "connectinterface.h"
 using namespace std;
 using namespace mysql_interface;
 int main()
@@ -16,7 +17,7 @@ int main()
     connector.fetch_one(USE_RESULT_MODE);
     vector<string> test;
     connector.parseRows(test);
-    std::cout<<test[0]<<std::endl;
+    //std::cout<<test[0]<<std::endl;
     if(connector.is_connect())
         std::cout<<"connect !"<<std::endl;
     connector.query(" select user_id, user_name,user_money from user where user_money > 1000;");
@@ -42,12 +43,27 @@ int main()
     test_pool_connector=pool->getConnector();//get the connector from the pool
     if(test_pool_connector->is_connect())
         std::cout<<"connector have connected!"<<endl;
+    test_pool_connector->query(" select user_id, user_name,user_money from user where user_money > 1000;");
+    test_pool_connector->fetch_all();
+    test.clear();
+    test_pool_connector->parseRows(test);
+    std::cout<<"ConnectPool test!\n"
+             <<test[0]<<std::endl;
+    std::cout<<test[1]<<std::endl;
     pool->freeConnection(test_pool_connector);
 
     /*
-     *
+     *test Sqlinterface!
      */
+    SqlInterface testInterface(pool);
 
+    testInterface.query("select user_id, user_name,user_money from user where user_money > 1000;",ALL);
+    vector<string> testIn;
+    testIn = testInterface.get_all();
+
+    std::cout<<"Interface test!\n"
+             <<test[0]<<std::endl;
+    std::cout<<test[1]<<std::endl;
     std::cout<<"finsh"<<std::endl;
     return 0;
 }

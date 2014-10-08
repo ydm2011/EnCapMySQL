@@ -62,8 +62,10 @@ int main()
 
     testInterface.query("select user_id, user_name,user_money from user where user_money > 1000;",ONE,STORE_RESULT_MODE);
     vector<string> testIn;
-    testIn = testInterface.get_all();
+    string test_result;
+    testInterface.get_one(test_result);
 
+    testIn = testInterface.get_all();
     std::cout<<"Interface test!\n"
              <<testIn[0]<<std::endl;
     std::cout<<testIn[1]<<std::endl;

@@ -103,7 +103,8 @@ void SqlInterface:: fetch_one(const std::string& query,Resultmode mode)throw(Sql
         log.write_log(confmgr::LEVEL_ERROR,"__SqlInterface__:fetch_one:__line__:45");
         return ;
     }
-
+    results.clear();
+    mode = USE_RESULT_MODE;//this can cover the bug of the connector;next version will fix this;
     connectorPtr->query(query.c_str());
 
     connectorPtr->fetch_one(mode);
@@ -118,6 +119,7 @@ void SqlInterface::fetch_all(const string& query, Resultmode mode)throw(SqlExcep
     {
         std::cout<<"Invalid query!"<<std::endl;
     }
+    mode = STORE_RESULT_MODE;//this will cover the bug of the connector;next version will fix this;
     connectorPtr->query(query.c_str());
     connectorPtr->fetch_all(mode);
     connectorPtr->parseRows(results);

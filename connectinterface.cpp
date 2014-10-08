@@ -23,7 +23,7 @@ SqlInterface::SqlInterface(ConnectPool *connectpool):no(ONE),connectPool(connect
     query_status(0)
 {
     if(!connectpool)
-        Throw(SqlException,"The ConnectPool is not defined");
+        Throw(SqlException,"The ConnectPool is not defined!");
     if(!connectpool->checkPool())
         Throw(SqlException,"The connection of the pool have exhausted!");
     connectorPtr = connectPool->getConnector();
@@ -43,16 +43,15 @@ void SqlInterface::query(const string &sql_query, GetNo getno,Resultmode mode)th
         Throw(SqlException,"__SqlInterface__:query:__line__:37:Invalid query!");
         log.write_log(confmgr::LEVEL_WARNING,"__SqlInterface__:query:__line__:37");
     }
-    if(result.size()&&results.size())
+    if(results.size())
         log.write_log(confmgr::LEVEL_WARNING,"__SqlInterface__:query:__line__:41");
-    result = "";
     results.clear();
     no = getno;
     //that means don't get the result!
     if(no==NONE)
         return;
     try{
-        if(no==ONE)
+        if(no==ONE&&mode==USE_RESULT_MODE)
             fetch_one(sql_query,mode);
         else fetch_all(sql_query,mode);
     }catch(SqlException)
@@ -63,37 +62,25 @@ void SqlInterface::query(const string &sql_query, GetNo getno,Resultmode mode)th
 //the fetch_one interface,return a copy of the response;
 //if the sql mode is limits 1 .it return the result copy;
 //if the sql mode is many,it should return  the last element of the results;
-string SqlInterface::get_one()
+int SqlInterface::get_one(string& result)
 {
-    string tmp;
-    if(no==ONE)
-    {
-        tmp = result;
-        result="";
-    }
-    else if(no != NONE )
+    if(no != NONE )
     {
         //this return the last element of the fetch_all result;
         if(!results.size())
-            return "";
+            return -1;
 
-        tmp = results.back();
+        result = results.back();
         results.pop_back();
-    }else tmp="";
-    return tmp;
+    }
+    return 0;
 }
 //the interface of send data to the users
 const vector<string>& SqlInterface::get_all()
 {
-    if(no==ONE)
-    {
-        results.clear();
-        if(!result.empty())
-            results.push_back(result);
-        result="";
-    }
     if(no==NONE)
         results.clear();
+
     return results;
 }
 unsigned long SqlInterface::get_status()
@@ -117,12 +104,10 @@ void SqlInterface:: fetch_one(const std::string& query,Resultmode mode)throw(Sql
         return ;
     }
 
-    vector<string> tmp;
     connectorPtr->query(query.c_str());
 
     connectorPtr->fetch_one(mode);
-    connectorPtr->parseRows(tmp);
-    result = tmp[0];
+    connectorPtr->parseRows(results);
 }
 
 //get all the response data from the database
@@ -136,4 +121,5 @@ void SqlInterface::fetch_all(const string& query, Resultmode mode)throw(SqlExcep
     connectorPtr->query(query.c_str());
     connectorPtr->fetch_all(mode);
     connectorPtr->parseRows(results);
+    std::cout<<"\n"<<results.size()<<std::endl;
 }

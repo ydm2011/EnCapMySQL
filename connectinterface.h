@@ -24,8 +24,8 @@ enum GetNo{NONE,ONE,ALL};
 class SqlInterface{
 public:
     SqlInterface(ConnectPool* connectpool);
-    void query(const std::string& sql_query,GetNo getno=ONE,Resultmode mode = USE_RESULT_MODE)throw(SqlException);
-    std::string get_one();
+    void query(const std::string& sql_query,GetNo getno=ONE,Resultmode mode = STORE_RESULT_MODE)throw(SqlException);
+    int get_one(string &result);
     const std::vector<std::string>& get_all();
     unsigned long get_status();
     ~SqlInterface();
@@ -42,7 +42,6 @@ private:
     Connector* connectorPtr;
 
     //store the query result;
-    std::string result;
     std::vector<std::string> results;
 
     confmgr::Log log;

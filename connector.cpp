@@ -137,11 +137,11 @@ string Connector::parseRow(MYSQL_ROW sql_row)
     int fields;
     fields = mysql_field_count(&db);
     string row;
-    row += sql_row[0];
-    int field=1;
+    row ="";
+    int field=0;
     while (field < fields) {
-        row += " ";
         row += sql_row[field];
+        row += ": ";
         field++;
     }
     return row;
@@ -152,7 +152,7 @@ void Connector::parseRows(vector<string>& result)
 {
     if(!rows.size())
     {
-        log.write_log(confmgr::LEVEL_ERROR,"Connector:parseRows rows empty!");
+        log.write_log(confmgr::LEVEL_WARNING,"Connector:parseRows rows empty!");
         return ;
     }
     vector<MYSQL_ROW>::iterator iter = this->rows.begin();

@@ -43,7 +43,7 @@ struct Testhandle{
         db_name = "daoming_test";
         sock_name = (const char*)0;
         port_number = 0;
-        flags = CLIENT_FOUND_ROWS;//can return all the affected rows no by setting this;
+        flags = CLIENT_FOUND_ROWS;//can return all the affected rows no. by setting this;
     }
 
     std::string host;
